@@ -11,9 +11,37 @@ public class CheckersBoard : MonoBehaviour
     private Vector3 boardOffset = new Vector3(-4.0f, 0, -4.0f);
     private Vector3 pieceOffset = new Vector3(0.5f, 0, 0.5f);
 
+    private Vector2 mouseOver;
+
     private void Start()
     {
         GenerateBoard();
+    }
+
+    private void Update()
+    {
+        UpdateMouseOver();
+    }
+
+    private void UpdateMouseOver()
+    {
+        if (!Camera.main)
+        {
+            Debug.Log("Unable to find main camera");
+            return;
+        }
+
+        RaycastHit hit;
+        if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, 25.0f, LayerMask.GetMask("Board")))
+        {
+            mouseOver.x = (int)(hit.point.x - boardOffset.x);
+            mouseOver.y = (int)(hit.point.z - boardOffset.z);
+        }
+        else
+        {
+            mouseOver.x = -1;
+            mouseOver.y = -1;
+        }
     }
 
     private void GenerateBoard()
