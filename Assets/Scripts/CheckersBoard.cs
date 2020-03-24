@@ -11,7 +11,11 @@ public class CheckersBoard : MonoBehaviour
     private Vector3 boardOffset = new Vector3(-4.0f, 0, -4.0f);
     private Vector3 pieceOffset = new Vector3(0.5f, 0, 0.5f);
 
+    private Piece selectedPiece;
+
     private Vector2 mouseOver;
+    private Vector2 startDrag;
+    private Vector3 endDrag;
 
     private void Start()
     {
@@ -20,9 +24,20 @@ public class CheckersBoard : MonoBehaviour
 
     private void Update()
     {
-        UpdateMouseOver();
-    }
+        //If it is my turn
+        {
+            UpdateMouseOver();
 
+            int x = (int)mouseOver.x;
+            int y = (int)mouseOver.y;
+
+            if (Input.GetMouseButtonDown(0))
+                SelectPiece(x, y);
+
+            if (Input.GetMouseButtonUp(0))
+                TryMove((int)startDrag.x, (int)startDrag.y, x, y);
+        }
+    }
     private void UpdateMouseOver()
     {
         if (!Camera.main)
@@ -42,6 +57,30 @@ public class CheckersBoard : MonoBehaviour
             mouseOver.x = -1;
             mouseOver.y = -1;
         }
+    }
+
+    private void SelectPiece(int x, int y)
+    {
+        if (x < 0 || x >= pieces.Length || y < 0 || y >= pieces.Length)
+            return;
+
+        Piece p = pieces[x, y];
+        if (p != null)
+        {
+            selectedPiece = p;
+            startDrag = mouseOver;
+            Debug.Log(selectedPiece.name);
+        }
+    }
+
+    private void TryMove(int x1, int y1, int x2, int y2)
+    {
+        
+        startDrag = new Vector2(x1, y1);
+        endDrag = new Vector2(x2, y2);
+        selectedPiece = pieces[x1, y1];
+
+        MovePiece(selectedPiece, x2, y2);
     }
 
     private void GenerateBoard()
