@@ -15,6 +15,7 @@ public class CheckersBoard : MonoBehaviour
     private bool isWhiteTurn;
 
     private Piece selectedPiece;
+    private List<Piece> forcedPieces = new List<Piece>();
 
     private Vector2 mouseOver;
     private Vector2 startDrag;
@@ -46,7 +47,6 @@ public class CheckersBoard : MonoBehaviour
                 TryMove((int)startDrag.x, (int)startDrag.y, x, y);
         }
     }
-
     private void UpdateMouseOver()
     {
         if (!Camera.main)
@@ -67,7 +67,6 @@ public class CheckersBoard : MonoBehaviour
             mouseOver.y = -1;
         }
     }
-
     private void UpdatePieceDrag(Piece p)
     {
         if (!Camera.main)
@@ -96,7 +95,6 @@ public class CheckersBoard : MonoBehaviour
             Debug.Log(selectedPiece.name);
         }
     }
-
     private void TryMove(int x1, int y1, int x2, int y2)
     {
         // Multiplayer support
@@ -147,9 +145,15 @@ public class CheckersBoard : MonoBehaviour
 
                 EndTurn();
             }
+            else
+            {
+                MovePiece(selectedPiece, x1, y1);
+                startDrag = Vector2.zero;
+                selectedPiece = null;
+                return;
+            }
         }
     }
-
     private void EndTurn()
     {
         selectedPiece = null;
@@ -158,10 +162,22 @@ public class CheckersBoard : MonoBehaviour
         isWhiteTurn = !isWhiteTurn;
         CheckVictory();
     }
-
     private void CheckVictory()
     {
 
+    }
+    private List<Piece> ScanForPossibleMove()
+    {
+        forcedPieces = new List<Piece>();
+
+        // Check all the pieces
+        for (int i = 0; i < pieces.Length; i++)
+            for (int j = 0; j < pieces.Length; j++)
+                if (pieces[i, j] != null && pieces[i, j].isWhite == isWhiteTurn)
+                    if (pieces[i, j].IsForceToMove(pieces, i, j))
+                        forcedPieces.Add(pieces[i, j]);
+
+        return forcedPieces;
     }
 
     private void GenerateBoard()
@@ -188,7 +204,6 @@ public class CheckersBoard : MonoBehaviour
             }
         }
     }
-
     private void GeneratePiece(int x, int y)
     {
         bool isPieceWhite = (y > 3) ? false : true;
@@ -198,7 +213,6 @@ public class CheckersBoard : MonoBehaviour
         pieces[x, y] = p;
         MovePiece(p, x, y);
     }
-
     private void MovePiece(Piece p, int x, int y)
     {
         p.transform.position = (Vector3.right * x) + (Vector3.forward * y) + boardOffset + pieceOffset;
