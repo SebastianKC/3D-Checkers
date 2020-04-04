@@ -65,6 +65,7 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\CheckersBoard.cs" />
     <Compile Include="Assets\Scripts\Piece.cs" />
+    <Compile Include="Assets\Scripts\Server.cs" />
     <Reference Include="Unity.Timeline.Editor">
       <HintPath>C:/Repositories/3D Checkers/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
     </Reference>
