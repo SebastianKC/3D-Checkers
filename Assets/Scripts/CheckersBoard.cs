@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class CheckersBoard : MonoBehaviour
 {
+    public static CheckersBoard Instance { set; get; }
+
     public Piece[,] pieces = new Piece[8, 8];
     public GameObject whitePiecePrefab;
     public GameObject blackPiecePrefab;
@@ -22,9 +24,14 @@ public class CheckersBoard : MonoBehaviour
     private Vector2 startDrag;
     private Vector2 endDrag;
 
+    private Client client;
 
     private void Start()
     {
+        Instance = this;
+        client = FindObjectOfType<Client>();
+        isWhite = client.isHost;
+
         isWhiteTurn = true;
         forcedPieces = new List<Piece>();
         GenerateBoard();
@@ -109,7 +116,7 @@ public class CheckersBoard : MonoBehaviour
             }
         }
     }
-    private void TryMove(int x1, int y1, int x2, int y2)
+    public void TryMove(int x1, int y1, int x2, int y2)
     {
         forcedPieces = ScanForPossibleMove();
 
@@ -151,7 +158,7 @@ public class CheckersBoard : MonoBehaviour
                     if (p != null)
                     {
                         pieces[(x1 + x2) / 2, (y1 + y2) / 2] = null;
-                        Destroy(p.gameObject);
+                        DestroyImmediate(p.gameObject);
                         hasKilled = true;
                     }
                 }
@@ -199,6 +206,14 @@ public class CheckersBoard : MonoBehaviour
                 selectedPiece.transform.Rotate(Vector3.right * 180);
             }
         }
+
+        string msg = "CMOV|";
+        msg += startDrag.x.ToString() + "|";
+        msg += startDrag.y.ToString() + "|";
+        msg += endDrag.x.ToString() + "|";
+        msg += endDrag.y.ToString();
+
+        client.Send(msg);
 
         selectedPiece = null;
         startDrag = Vector2.zero;
